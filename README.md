@@ -9,7 +9,7 @@
 
 > **Course**: CSE437 - Data Science  
 > **Dataset**: [Used Car Dataset (Kaggle)](https://www.kaggle.com/datasets/rishabhkarn/used-car-dataset) by Rishabh Karn  
-> **Target Variable**: `price_cleaned` (Resale Price in Lakhs INR, where $1\text{ Lakh} = 100,000\text{ INR}$)
+> **Target Variable**: `price_cleaned` (Resale Price in Lakhs INR, where 1 Lakh = 100,000 INR)
 
 ---
 
@@ -17,17 +17,17 @@
 
 Traditional vehicle appraisal models evaluate raw, static specifications in isolation—such as total odometer reading, nominal engine displacement, or manufacturing year. This approach fails to capture dynamic physical wear: a car driven 50,000 km in one year experiences vastly different annual strain and depreciation compared to a car driven 50,000 km across a decade.
 
-This project introduces a **rate-engineered machine learning framework** that models dynamic usage intensity, engine power density, registration delays, and brand tiers. Across seven regression algorithms spanning linear baselines and tree ensembles, rate-engineered features yield consistent performance gains, with the **Voting Ensemble** and **Tree Ensembles** achieving an **$R^2 \approx 0.79$** and reducing prediction error to **$\approx 8.14\text{ Lakhs INR}$**.
+This project introduces a **rate-engineered machine learning framework** that models dynamic usage intensity, engine power density, registration delays, and brand tiers. Across seven regression algorithms spanning linear baselines and tree ensembles, rate-engineered features yield consistent performance gains, with the **Voting Ensemble** and **Tree Ensembles** achieving an **R² ≈ 0.79** and reducing prediction error to **≈ 8.14 Lakhs INR**.
 
 ---
 
 ## 📂 Repository Contents
 
 ```text
-├── Quantifying_Used_Car_Depreciation_Paper.pdf     # Full academic research paper (PDF)
+├── Quantifying_Used_Car_Depreciation_Paper.pdf       # Full academic research paper (PDF)
 ├── Quantifying_Used_Car_Depreciation_Notebook.ipynb  # End-to-end Jupyter Notebook with executable code & plots
-├── requirements.txt                                # Python package dependencies
-└── README.md                                       # Project documentation
+├── requirements.txt                                  # Python package dependencies
+└── README.md                                         # Project documentation
 ```
 
 ---
@@ -39,27 +39,27 @@ The dataset contains raw web-scraping artifacts, including shifted rows, mixed d
 - **Structural Alignment**: Shifted rows where `mileage(kmpl)` held engine displacement and `torque(Nm)` held peak power were programmatically parsed and corrected.
 - **Year Parsing**: Date formats (e.g., `Month-YY`) were converted to 4-digit Gregorian years (`reg_year_clean`), defaulting to `manufacturing_year` when unrecorded.
 - **Horsepower Extraction**: Scaled Brake Horsepower (`real_max_power_bhp`) was parsed and verified against manufacturer specifications.
-- **Price Scaling**: Raw INR values were standardized to Lakhs INR ($100,000\text{ INR} = 1.0\text{ Lakh}$).
+- **Price Scaling**: Raw INR values were standardized to Lakhs INR (100,000 INR = 1.0 Lakh).
 - **Outlier Capping & Imputation**: Continuous numeric columns were bounded to physical thresholds and imputed using column medians to prevent distributional skewing.
 
 ### 2. Rate-Engineered Domain Features
 | Feature | Formulation | Domain Rationale |
 | :--- | :--- | :--- |
-| `vehicle_age` | $\max(2024 - \text{mfg\_year}, 1)$ | Captures physical temporal aging relative to evaluation baseline. |
-| `usage_intensity` | $\frac{\text{kms\_driven}}{\text{vehicle\_age}}$ | **Annual wear rate (km/year)**: Distinguishes high-intensity fleet cars from lightly used older vehicles. |
-| `power_density` | $\frac{\text{real\_max\_power\_bhp}}{\text{engine(cc)}}$ | Specific engine power efficiency metric ($bhp/cc$) reflecting tuning quality. |
-| `registration_delay` | $\text{clip}(\text{reg\_year} - \text{mfg\_year}, 0, 5)$ | Captures showroom holding time and pre-registration delays. |
+| `vehicle_age` | `max(2024 - manufacturing_year, 1)` | Captures physical temporal aging relative to evaluation baseline. |
+| `usage_intensity` | `kms_driven / vehicle_age` | **Annual wear rate (km/year)**: Distinguishes high-intensity fleet cars from lightly used older vehicles. |
+| `power_density` | `real_max_power_bhp / engine(cc)` | Specific engine power efficiency metric (bhp/cc) reflecting tuning quality. |
+| `registration_delay` | `clip(reg_year - manufacturing_year, 0, 5)` | Captures showroom holding time and pre-registration delays. |
 | `brand_segment` | Luxury vs. Mainstream | Segregates premium prestige brands (*Mercedes-Benz, BMW, Audi, Porsche, etc.*) to model non-linear price drops. |
-| `log_transformations`| $\log(1 + x)$ | Compresses long-tailed distributions for skewed numerical attributes. |
+| `log_transformations`| `log(1 + x)` | Compresses long-tailed distributions for skewed numerical attributes. |
 
 ---
 
 ## 📊 Key Results & Comparative Benchmarks
 
 ### 1. Comparative Model Performance (Raw Baseline vs. Rate-Engineered)
-All models were evaluated on an **unseen 20% test split** ($N = 222$) with **5-Fold Cross-Validation** on the training split ($N = 886$):
+All models were evaluated on an **unseen 20% test split** (N = 222) with **5-Fold Cross-Validation** on the training split (N = 886):
 
-| Model | 5-Fold CV $R^2$ | Raw Test $R^2$ | Engineered Test $R^2$ | $R^2$ Gain (%) | Raw RMSE (Lakhs) | Eng RMSE (Lakhs) | Eng MAE (Lakhs) |
+| Model | 5-Fold CV R² | Raw Test R² | Engineered Test R² | R² Gain (%) | Raw RMSE (Lakhs) | Eng RMSE (Lakhs) | Eng MAE (Lakhs) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Voting Ensemble (RF+ET+XGB+LGB)** | **0.7550** | **0.7182** | **0.7899** | **+9.99%** | **9.43** | **8.14** | **3.46** |
 | **XGBoost Regressor** | 0.7381 | 0.6961 | 0.7770 | +11.62% | 9.79 | 8.39 | 3.59 |
@@ -72,7 +72,7 @@ All models were evaluated on an **unseen 20% test split** ($N = 222$) with **5-F
 ### 2. Domain-Level Feature Ablation Study
 Removing top features iteratively from the best-performing model validates the individual importance of engineered variables:
 
-| Removed Feature | Original $R^2$ | Ablated $R^2$ | Drop ($\Delta R^2$) | Impact Rating |
+| Removed Feature | Original R² | Ablated R² | Drop (ΔR²) | Impact Rating |
 | :--- | :---: | :---: | :---: | :---: |
 | `brand_segment` | 0.7745 | 0.6780 | **-0.0965** | **Critical** |
 | `vehicle_age` | 0.7745 | 0.7533 | **-0.0212** | **High** |
@@ -92,8 +92,8 @@ Removing top features iteratively from the best-performing model validates the i
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
+git clone https://github.com/Audri-23/Used-Car-Price-Prediction.git
+cd Used-Car-Price-Prediction
 ```
 
 ### 2. Set Up Virtual Environment (Recommended)
@@ -131,4 +131,4 @@ To run directly in Google Colab:
 ## 📈 Key Takeaways for Automotive Pricing
 1. **Usage Intensity Matters More Than Raw Odometer**: An annualized run rate provides tree models with the context needed to distinguish highway fleet vehicles from low-mileage city commuters.
 2. **Prestige Premium Dynamics**: Brand segmenting is the strongest predictor of resale value. Luxury cars experience steeper early depreciation curves (steep non-linear decay in years 1–4) compared to mainstream cars.
-3. **Power-to-Displacement Efficiency**: The `power_density` ratio ($bhp/cc$) acts as a strong pricing proxy for engine performance grade and trim level without introducing excessive model variance.
+3. **Power-to-Displacement Efficiency**: The `power_density` ratio (bhp/cc) acts as a strong pricing proxy for engine performance grade and trim level without introducing excessive model variance.
